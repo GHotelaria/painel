@@ -396,7 +396,7 @@ def abrir_cotacao():
             'pt': {'Dom': 'Dom', 'Seg': 'Seg', 'Ter': 'Ter', 'Qua': 'Qua', 'Qui': 'Qui', 'Sex': 'Sex', 'Sáb': 'Sáb'},
             'es': {'Dom': 'Dom', 'Seg': 'Lun', 'Ter': 'Mar', 'Qua': 'Mié', 'Qui': 'Jue', 'Sex': 'Vie', 'Sáb': 'Sáb'},
             'en': {'Dom': 'Sun', 'Seg': 'Mon', 'Ter': 'Tue', 'Qua': 'Wed', 'Qui': 'Thu', 'Sex': 'Fri', 'Sáb': 'Sat'},
-            'it': {'Dom': 'Dom', 'Seg': 'Lun', 'Ter': 'Mar', 'Qua': 'Mer', 'Qui': 'Gio', 'Sex': 'Ven', 'Sáb': 'Sab'}
+            'it': {'Dom': 'Dom', 'Seg': 'Lun', 'Ter': 'Mar', 'Qua': 'Mer', 'Qui': 'Gio', 'Sex': 'Ven', 'Sáb': 'Sáb'}
         }
         d_in_sem = semana_map[code].get(dia_in_semana, dia_in_semana)
         d_out_sem = semana_map[code].get(dia_out_semana, dia_out_semana)
@@ -603,4 +603,5 @@ threading.Thread(target=create_tray_icon, daemon=True).start()
 
 # Iniciar a janela
 janela.mainloop()
+
 
