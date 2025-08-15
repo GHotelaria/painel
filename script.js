@@ -476,6 +476,11 @@ Grazie mille! Siamo a tua disposizione e in contatto.`
             const termoPessoas = parseInt(pax) === 1 ? labels.pessoa : labels.pessoas;
 
             // Gera a cotação formatada
+            let cafeMsg = labels.cafe;
+            if (nomePousada === 'SOLAR JOÃO FERNANDES') {
+                cafeMsg = ''; // Não exibe café da manhã para Solar João Fernandes
+            }
+
             const cotacaoFormatada = `🏡 ${nomeTag}
 📍 Endereço: ${enderecos[nomePousada]}
 🛏️ ${quartoTag}
@@ -490,7 +495,7 @@ Grazie mille! Siamo a tua disposizione e in contatto.`
 
 💰 ${labels.valor}: ${valorTotal}
 
-${labels.cafe}
+${cafeMsg}
 
 Aguardamos você! 🌟`;
 
