@@ -327,7 +327,7 @@ def abrir_cotacao():
     def processar_dados():
         texto = area_texto.get('1.0', tk.END)
 
-        datas_match = re.search(r"(\w{3}),\s([\wçÇ]+)\.?\s(\d{1,2})\s*-\s*(\w{3}),\s([\wçÇ]+)\.?\s(\d{1,2})", texto)
+        datas_match = re.search(r"([A-Za-zçÇ]{3,4}),?\s([\wçÇ]+)\.?\s(\d{1,2})\s*-\s*([A-Za-zçÇ]{3,4}),?\s([\wçÇ]+)\.?\s(\d{1,2})",texto)
         valor_match = re.search(r"R\$\s?\d+[\.,]?\d*", texto)
 
         if not datas_match or not valor_match:
@@ -396,7 +396,7 @@ def abrir_cotacao():
             'pt': {'Dom': 'Dom', 'Seg': 'Seg', 'Ter': 'Ter', 'Qua': 'Qua', 'Qui': 'Qui', 'Sex': 'Sex', 'Sáb': 'Sáb'},
             'es': {'Dom': 'Dom', 'Seg': 'Lun', 'Ter': 'Mar', 'Qua': 'Mié', 'Qui': 'Jue', 'Sex': 'Vie', 'Sáb': 'Sáb'},
             'en': {'Dom': 'Sun', 'Seg': 'Mon', 'Ter': 'Tue', 'Qua': 'Wed', 'Qui': 'Thu', 'Sex': 'Fri', 'Sáb': 'Sat'},
-            'it': {'Dom': 'Dom', 'Seg': 'Lun', 'Ter': 'Mar', 'Qua': 'Mer', 'Qui': 'Gio', 'Sex': 'Ven', 'Sáb': 'Sáb'}
+            'it': {'Dom': 'Dom', 'Seg': 'Lun', 'Ter': 'Mar', 'Qua': 'Mer', 'Qui': 'Gio', 'Sex': 'Ven', 'Sáb': 'Sab'}
         }
         d_in_sem = semana_map[code].get(dia_in_semana, dia_in_semana)
         d_out_sem = semana_map[code].get(dia_out_semana, dia_out_semana)
@@ -603,5 +603,6 @@ threading.Thread(target=create_tray_icon, daemon=True).start()
 
 # Iniciar a janela
 janela.mainloop()
+
 
 
