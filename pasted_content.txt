@@ -1,0 +1,606 @@
+import sys
+import os
+import tkinter as tk
+from tkinter import ttk, messagebox
+import webbrowser
+import pyperclip
+import re
+from datetime import datetime
+from pystray import Icon, MenuItem, Menu
+from PIL import Image, ImageTk
+import threading
+
+# outros imports…
+
+# === Ajuste para rodar dentro do .exe gerado ===
+if getattr(sys, 'frozen', False):
+    base_path = sys._MEIPASS
+else:
+    base_path = os.path.dirname(__file__)
+
+ICON_PNG = os.path.join(base_path, 'imagem', 'icone.png')
+ICON_ICO = os.path.join(base_path, 'imagem', 'icone.ico')
+# ================================================
+
+# Dicionários de URLs
+pousadas = {
+    "POUSADA CENTRO CLASS": "http://hotels.cloudbeds.com/connect/208581#/calendar",
+    "POUSADA CASA CENTRO": "http://hotels.cloudbeds.com/connect/207758#/calendar",
+    "POUSADA CENTRO UP": "http://hotels.cloudbeds.com/connect/209202#/calendar",
+    "SOLAR JOÃO FERNANDES": "http://hotels.cloudbeds.com/connect/239462#/calendar",
+    "NOTA FISCAL": "https://nfse.buzios.rj.gov.br/"
+}
+
+# Endereços
+enderecos = {
+    "POUSADA CENTRO CLASS": "R. Rui Barbosa, 08 - Centro, A. dos Búzios - RJ",
+    "POUSADA CASA CENTRO": "R. Rui Barbosa, 12 - Centro, A. dos Búzios - RJ",
+    "POUSADA CENTRO UP": "R. Rui Barbosa, 229 A - Centro, Triângulo A. dos Búzios - RJ",
+    "SOLAR JOÃO FERNANDES": "R. João Fernandes, 45 - João Fernandes, Búzios - RJ"
+}
+
+tipos_quarto = {
+    "POUSADA": ["Duplo Standard", "Triplo"],
+    "JOAO_FERNANDES": ["Duplo", "Triplo", "Quadruplo", "Quíntuplo", "Sextuplo"]
+}
+# Templates de mensagem por idioma
+templates_mensagem = {
+    'Português': (
+        "👋 Olá! Tudo bem? Somos seus anfitriões da G Hotelaria Brasil durante sua estadia em Búzios.\n"
+        "Vemos que você tem uma reserva no SOLAR JOÃO FERNANDES!\n\n"
+        "🎒 A QUE HORAS POSSO ENTRAR?\n"
+        "O check-in é a partir das 14h, sem exceções.\n\n"
+        "👉 COMO CHEGO?\n"
+        "https://www.google.com/maps/place/22%C2%B045'03.8%22S+41%C2%B052'40.8%22W/@-22.751049,-41.880578,17z/data=!3m1!4b1!4m4!3m3!8m2!3d-22.751049!4d-41.8780031?hl=pt-BR&entry=ttu\n"
+        "O complexo está localizado na Rua São Cristóvão, 16, no bairro João Fernandes.\n\n"
+        "🏡 QUAL É O MEU APARTAMENTO?\n"
+        "O apartamento reservado para você é o número {num}.\n\n"
+        "🔑 COMO ENTRO?\n"
+        "A propriedade conta com um cofre mecânico para guardar chaves!\n"
+        "Para acessar:\n"
+        "1️⃣ Abaixe a tampa do cofre.\n"
+        "2️⃣ Insira os 4 dígitos: *0816*.\n"
+        "3️⃣ Abra o cofre, retire a chave e abra a porta.\n"
+        "4️⃣ Após entrar, devolva a chave no cofre e, por segurança, altere os números.\n\n"
+        "📶 TEM WIFI?\n"
+        "- Rede: Solar João Fernandes (três redes disponíveis, mesma senha).\n"
+        "- Senha: solarbuzios.\n\n"
+        "🏊🏼‍♀️ HORÁRIO DA PISCINA:\n"
+        "Até as 22h.\n\n"
+        "💳 PAGAMENTO:\n"
+        "Pago no primeiro dia. Aceitamos débito, crédito, transferência ou dinheiro.\n\n"
+        "Muito obrigado! Estamos à disposição e em contato!"
+    ),
+    'Español': (
+        "👋 ¡Hola! ¿Cómo estás? Somos tus anfitriones de G Hotelaria Brasil durante tu estadía en Búzios.\n"
+        "Vemos que tienes una reserva en SOLAR JOÃO FERNANDES.\n\n"
+        "🎒 ¿A QUÉ HORA PUEDO ENTRAR?\n"
+        "El check-in es a partir de las 14:00, sin excepciones.\n\n"
+        "👉 ¿CÓMO LLEGO?\n"
+        "https://www.google.com/maps/place/22%C2%B045'03.8%22S+41%C2%B052'40.8%22W/@-22.751049,-41.880578,17z/data=!3m1!4b1!4m4!3m3!8m2!3d-22.751049!4d-41.8780031?hl=es&entry=ttu\n"
+        "El complejo está ubicado en Rua São Cristóvão, 16, barrio João Fernandes.\n\n"
+        "🏡 ¿CUÁL ES MI APARTAMENTO?\n"
+        "El apartamento reservado para ti es el número {num}.\n\n"
+        "🔑 ¿CÓMO ENTRO?\n"
+        "La propiedad cuenta con una caja mecánica para llaves.\n"
+        "Para acceder:\n"
+        "1️⃣ Baja la tapa de la caja.\n"
+        "2️⃣ Ingresa los 4 dígitos: *0816*.\n"
+        "3️⃣ Abre la caja, retira la llave y abre la puerta.\n"
+        "4️⃣ Tras entrar, devuelve la llave y por seguridad cambia el código.\n\n"
+        "📶 ¿HAY WIFI?\n"
+        "- Red: Solar João Fernandes (tres redes disponibles, misma clave).\n"
+        "- Contraseña: solarbuzios.\n\n"
+        "🏊🏼‍♀️ HORARIO DE LA PISCINA:\n"
+        "Hasta las 22:00.\n\n"
+        "💳 PAGO:\n"
+        "Se realiza el primer día. Aceptamos débito, crédito, transferencia o efectivo.\n\n"
+        "¡Muchas gracias! Quedamos a tu disposición y en contacto."
+    ),
+    'English': (
+        "👋 Hello! How are you? We are your hosts from G Hotelaria Brasil during your stay in Búzios.\n"
+        "We see you have a reservation at SOLAR JOÃO FERNANDES.\n\n"
+        "🎒 WHAT TIME CAN I CHECK IN?\n"
+        "Check-in starts at 2:00 PM, no exceptions.\n\n"
+        "👉 HOW DO I GET THERE?\n"
+        "https://www.google.com/maps/place/22%C2%B045'03.8%22S+41%C2%B052'40.8%22W/@-22.751049,-41.880578,17z/data=!3m1!4b1!4m4!3m3!8m2!3d-22.751049!4d-41.8780031?hl=en&entry=ttu\n"
+        "The complex is located at Rua São Cristóvão, 16, João Fernandes neighborhood.\n\n"
+        "🏡 WHICH APARTMENT DO I HAVE?\n"
+        "The reserved apartment for you is number {num}.\n\n"
+        "🔑 HOW DO I ENTER?\n"
+        "The property has a mechanical safe for keys.\n"
+        "To access:\n"
+        "1️⃣ Lift the safe cover.\n"
+        "2️⃣ Enter the 4-digit code: *0816*.\n"
+        "3️⃣ Open the safe, take the key and open the door.\n"
+        "4️⃣ After entering, return the key and for security change the code.\n\n"
+        "📶 IS THERE WIFI?\n"
+        "- Network: Solar João Fernandes (three networks available, same password).\n"
+        "- Password: solarbuzios.\n\n"
+        "🏊🏼‍♀️ POOL HOURS:\n"
+        "Available until 10:00 PM.\n\n"
+        "💳 PAYMENT:\n"
+        "Due on arrival day. We accept debit, credit, transfer or cash.\n\n"
+        "Thank you very much! We are at your disposal and in touch."
+    ),
+    'Italiano': (
+        "👋 Ciao! Come stai? Siamo i tuoi host di G Hotelaria Brasil durante il tuo soggiorno a Búzios.\n"
+        "Hai una prenotazione al SOLAR JOÃO FERNANDES.\n\n"
+        "🎒 A CHE ORA POSSO FARE IL CHECK-IN?\n"
+        "Il check-in è dalle 14:00, senza eccezioni.\n\n"
+        "👉 COME ARRIVO?\n"
+        "https://www.google.com/maps/place/22%C2%B045'03.8%22S+41%C2%B052'40.8%22W/@-22.751049,-41.880578,17z/data=!3m1!4b1!4m4!3m3!8m2!3d-22.751049!4d-41.8780031?hl=it&entry=ttu\n"
+        "Il complesso si trova in Rua São Cristóvão, 16, quartiere João Fernandes.\n\n"
+        "🏡 QUAL È IL MIO APPARTAMENTO?\n"
+        "L’appartamento riservato per te è il numero {num}.\n\n"
+        "🔑 COME POSSO ENTRARE?\n"
+        "La proprietà dispone di una cassaforte meccanica per le chiavi.\n"
+        "Per accedere:\n"
+        "1️⃣ Solleva il coperchio della cassaforte.\n"
+        "2️⃣ Inserisci il codice a 4 cifre: *0816*.\n"
+        "3️⃣ Apri la cassaforte, prendi la chiave e apri la porta.\n"
+        "4️⃣ Dopo l’ingresso, riponi la chiave e per sicurezza cambia il codice.\n\n"
+        "📶 WIFI:\n"
+        "- Rete: Solar João Fernandes (tre reti disponibili, stessa password).\n"
+        "- Password: solarbuzios.\n\n"
+        "🏊🏼‍♀️ ORARIO DELLA PISCINA:\n"
+        "Fino alle 22:00.\n\n"
+        "💳 PAGAMENTO:\n"
+        "Saldo da pagare il giorno dell’arrivo. Accettiamo debito, credito, bonifico o contanti.\n\n"
+        "Grazie mille! Siamo a tua disposizione e in contatto."
+    )
+}
+
+
+
+
+
+
+# Funções auxiliares
+def abrir_painel(url):
+    webbrowser.open(url)
+
+def abrir_mensagem_solar():
+    win = tk.Toplevel()
+    win.title('Mensagem Solar João Fernandes')
+    win.iconbitmap(ICON_ICO)
+    win.geometry('600x500')
+
+    # 1) Tema escuro:
+    bg_cor = '#1E1E1E'      # Grafite escuro
+    fg_cor = '#F5F5F5'      # Branco suave
+    win.configure(bg=bg_cor)
+
+    # 2) Label “Idioma”
+    tk.Label(
+        win, text='Idioma:',
+        bg=bg_cor, fg=fg_cor,
+        font=('Arial', 10, 'bold')
+    ).pack(anchor='nw', padx=10, pady=(10,0))
+
+    # Combobox de idiomas (ttk)
+    style = ttk.Style()
+    style.theme_use('clam')  # tema que permite customização
+    style.configure('Dark.TCombobox',
+                    fieldbackground=bg_cor,
+                    background=bg_cor,
+                    foreground=fg_cor)
+    combo_idioma_m = ttk.Combobox(
+        win, values=list(templates_mensagem.keys()),
+        state='readonly', style='Dark.TCombobox'
+    )
+    combo_idioma_m.current(0)
+    combo_idioma_m.pack(anchor='nw', padx=10, pady=(0,10))
+    # Texto explicativo
+    explicacao = (
+        "Selecione o idioma e o número do loft para gerar automaticamente.\n"
+        "Mude o idioma e clique no loft de novo para atualizar"
+    )
+    tk.Label(
+        win, text=explicacao,
+        bg=bg_cor, fg=fg_cor,
+        font=('Arial', 13),
+        justify='left'   # alinha o texto à esquerda
+    ).pack(anchor='nw', padx=10, pady=(0,10))
+
+    # 3) Frame de botões dos lofts
+    frame_lofts = tk.Frame(win, bg=bg_cor)
+    frame_lofts.pack(pady=10)
+    for i in range(1, 9):
+        num = f'{i:02d}'
+        tk.Button(
+            frame_lofts, text=num, width=5, height=2,
+            bg='#333333', fg=fg_cor, relief='flat',
+            command=lambda n=num: gerar_mensagem(n, combo_idioma_m.get(), area_mensagem)
+        ).pack(side='left', padx=5)
+
+    # 4) Área de texto
+    area_mensagem = tk.Text(
+        win, height=15, width=70,
+        bg='#2C2C2C', fg=fg_cor, insertbackground=fg_cor
+    )
+    area_mensagem.pack(padx=10, pady=10)
+
+    # 5) Botão copiar
+    tk.Button(
+        win, text='📋 Copiar Mensagem',
+        command=lambda: copiar_mensagem(area_mensagem),
+        bg='#4CAF50', fg='white', font=('Arial', 10, 'bold')
+    ).pack(pady=(0,10))
+
+def gerar_mensagem(num, idioma, area):
+    tpl = templates_mensagem.get(idioma, '')
+    msg = tpl.format(num=num)
+    area.delete('1.0', tk.END)
+    area.insert(tk.END, msg)
+
+
+def copiar_mensagem(area):
+    texto = area.get('1.0', tk.END).strip()
+    pyperclip.copy(texto)
+    messagebox.showinfo('Copiado', 'Mensagem copiada!')
+def abrir_painel(url):
+    webbrowser.open(url)
+
+def ocultar_painel():
+    janela.withdraw()
+    icon.visible = True
+
+def bind_atalho_reexibir(event=None):
+    janela.deiconify()
+    icon.visible = False
+
+# Cria ícone na bandeja usando arquivo existente
+def create_tray_icon():
+    global icon
+    image = Image.open(ICON_PNG)
+    def on_quit(icon_obj, item):
+        icon_obj.stop()
+        janela.quit()
+        sys.exit()
+    def on_show(icon_obj, item):
+        janela.after(0, janela.deiconify)
+        icon_obj.visible = False
+    icon = Icon(
+        'Pousadas',
+        image,
+        menu=Menu(
+            MenuItem('Mostrar Painel', on_show),
+            MenuItem('Sair', on_quit)
+        )
+    )
+    icon.run()
+
+# Botão de informações
+def show_info():
+    info = tk.Toplevel()
+    info.title('Funcionalidades Principais')
+    info.iconbitmap(ICON_ICO)
+    info.geometry('800x580')
+    info.configure(bg='#f4f4f9')
+    texto = """
+🧩 Funcionalidades Principais
+📌 Acesso Rápido a Painéis de Pousadas
+  - Abre diretamente o calendário da Cloudbeds de cada pousada.
+  - URLs armazenadas em um dicionário (pousadas).
+
+📍 Endereços das Pousadas
+  - Exibidos automaticamente na cotação de acordo com a pousada selecionada.
+
+📝 Geração de Cotações Multilíngue
+  - Idiomas suportados: Português, Espanhol, Inglês, Italiano.
+  - Reconhece padrão de datas e valores copiados do sistema Cloudbeds.
+  - Calcula diárias, monta mensagem com detalhes e permite copiar o texto final.
+
+🔤 Traduções Automatizadas
+  - Traduz nome da pousada, tipo de quarto, rótulos e mensagens.
+  - Tradução do dia da semana com base no idioma escolhido.
+
+🛏️ Tipos de Quarto
+  - Listas dinâmicas conforme a pousada selecionada:
+    POUSADA: Duplo Standard, Triplo.
+    JOAO_FERNANDES: Duplo, Triplo, Quadruplo, Quíntuplo, Sextuplo.
+
+💬 Mensagem Solar João Fernandes (LOFTS)
+  - Permite selecionar o idioma e o número do loft para gerar automaticamente uma mensagem personalizada.
+  - A mensagem muda conforme o idioma escolhido e o número clicado.
+  - Ideal para envio rápido de instruções aos hóspedes da João Fernandes.
+
+💻 Interface Gráfica (Tkinter)
+  - Janela principal com atalhos.
+  - Janela de cotação com campos: pousada, número de pessoas, tipo de quarto, idioma, área para colar texto da cotação.
+
+📋 Copiar com um clique
+  - Copia a mensagem gerada para a área de transferência.
+
+📂 Ícone na Bandeja do Sistema
+  - Permite minimizar o painel principal e restaurar via bandeja.
+  - Fechar pelo menu da bandeja encerra o programa corretamente.
+
+  - Desenvolvido por Christiano P. Marcos - Recepção G Hotelaria
+"""
+    lbl = tk.Label(info, text=texto, justify='left', bg='#f4f4f9', font=('Arial', 10))
+    lbl.pack(padx=10, pady=10)
+
+# Função de cotação (integralmente preservada)
+def abrir_cotacao():
+    def processar_dados():
+        texto = area_texto.get('1.0', tk.END)
+
+        datas_match = re.search(r"(\w{3}),\s([\wçÇ]+)\.?\s(\d{1,2})\s*-\s*(\w{3}),\s([\wçÇ]+)\.?\s(\d{1,2})", texto)
+        valor_match = re.search(r"R\$\s?\d+[\.,]?\d*", texto)
+
+        if not datas_match or not valor_match:
+            messagebox.showerror('Erro', 'Formato inválido. Copie do Cloudbeds.com.')
+            return
+
+        dia_in_semana, mes_in, dia_in = datas_match.group(1), datas_match.group(2), datas_match.group(3)
+        dia_out_semana, mes_out, dia_out = datas_match.group(4), datas_match.group(5), datas_match.group(6)
+
+        meses = {
+            'Janeiro': '01', 'Fevereiro': '02', 'Março': '03', 'Abril': '04',
+            'Maio': '05', 'Junho': '06', 'Julho': '07', 'Agosto': '08',
+            'Setembro': '09', 'Outubro': '10', 'Novembro': '11', 'Dezembro': '12',
+            'Jan': '01', 'Fev': '02', 'Mar': '03', 'Abr': '04',
+            'Mai': '05', 'Jun': '06', 'Jul': '07', 'Ago': '08',
+            'Set': '09', 'Out': '10', 'Nov': '11', 'Dez': '12'
+        }
+
+        mes_in_num = meses.get(mes_in.capitalize().replace('.', ''), '00')
+        mes_out_num = meses.get(mes_out.capitalize().replace('.', ''), '00')
+
+        checkin_data = f"{dia_in.zfill(2)}/{mes_in_num}/2025"
+        checkout_data = f"{dia_out.zfill(2)}/{mes_out_num}/2025"
+
+        valor_total = valor_match.group(0).replace(',', '.')
+
+        checkin_dt = datetime.strptime(checkin_data, '%d/%m/%Y')
+        checkout_dt = datetime.strptime(checkout_data, '%d/%m/%Y')
+        diarias = (checkout_dt - checkin_dt).days
+
+        nome_pousada = combo_pousada.get()
+        pax = entrada_pessoas.get()
+        tipo_quarto = combo_quarto.get()
+        idioma = combo_idioma.get()
+
+        nome_pousada = combo_pousada.get()
+        pax = entrada_pessoas.get()
+        tipo_quarto = combo_quarto.get()
+        idioma = combo_idioma.get()
+
+        if not nome_pousada or not pax or not tipo_quarto or not idioma:
+            messagebox.showwarning('Aviso', 'Você não colocou a quantidade de pax')
+            return
+
+        # Verifica se pax é número
+        try:
+            pax = int(pax)
+        except ValueError:
+            messagebox.showerror("Erro", "Digite um número válido de pessoas.")
+            return
+
+        labels = {
+            'Português': ('pt', 'noite', 'noites', 'pessoa', 'pessoas', '❤️ Café da manhã incluído.'),
+            'Español': ('es', 'noche', 'noches', 'persona', 'personas', '❤️ Desayuno incluido.'),
+            'English': ('en', 'night', 'nights', 'guest', 'guests', '❤️ Breakfast included.'),
+            'Italiano': ('it', 'notte', 'notti', 'ospite', 'ospiti', '❤️ Colazione inclusa.')
+        }
+
+        if idioma not in labels:
+            messagebox.showerror('Erro', 'Idioma não suportado.')
+            return
+
+        code, l_noite, l_noites, l_pess_sg, l_pess_pl, l_cafe = labels[idioma]
+
+        semana_map = {
+            'pt': {'Dom': 'Dom', 'Seg': 'Seg', 'Ter': 'Ter', 'Qua': 'Qua', 'Qui': 'Qui', 'Sex': 'Sex', 'Sáb': 'Sáb'},
+            'es': {'Dom': 'Dom', 'Seg': 'Lun', 'Ter': 'Mar', 'Qua': 'Mié', 'Qui': 'Jue', 'Sex': 'Vie', 'Sáb': 'Sáb'},
+            'en': {'Dom': 'Sun', 'Seg': 'Mon', 'Ter': 'Tue', 'Qua': 'Wed', 'Qui': 'Thu', 'Sex': 'Fri', 'Sáb': 'Sat'},
+            'it': {'Dom': 'Dom', 'Seg': 'Lun', 'Ter': 'Mar', 'Qua': 'Mer', 'Qui': 'Gio', 'Sex': 'Ven', 'Sáb': 'Sab'}
+        }
+        d_in_sem = semana_map[code].get(dia_in_semana, dia_in_semana)
+        d_out_sem = semana_map[code].get(dia_out_semana, dia_out_semana)
+
+        nome_map = {
+            'POUSADA CENTRO CLASS': {'pt': 'POUSADA CENTRO CLASS', 'es': 'POSADA CENTRO CLASS', 'en': 'CENTRO CLASS INN', 'it': 'LOCANDA CENTRO CLASS'},
+            'POUSADA CASA CENTRO': {'pt': 'POUSADA CASA CENTRO', 'es': 'POSADA CASA CENTRO', 'en': 'CASA CENTRO INN', 'it': 'LOCANDA CASA CENTRO'},
+            'POUSADA CENTRO UP': {'pt': 'POUSADA CENTRO UP', 'es': 'POSADA CENTRO UP', 'en': 'CENTRO UP INN', 'it': 'LOCANDA CENTRO UP'},
+            'SOLAR JOÃO FERNANDES': {'pt': 'SOLAR JOÃO FERNANDES', 'es': 'SOLAR JOÃO FERNANDES', 'en': 'SOLAR JOÃO FERNANDES', 'it': 'SOLAR JOÃO FERNANDES'}
+        }
+        qt_map = {
+            'Duplo Standard': {'pt': 'Duplo Standard', 'es': 'Doble Estándar', 'en': 'Standard Double', 'it': 'Doppia Standard'},
+            'Triplo': {'pt': 'Triplo', 'es': 'Triple', 'en': 'Triple', 'it': 'Tripla'},
+            'Quadruplo': {'pt': 'Quadruplo', 'es': 'Cuádruple', 'en': 'Quadruple', 'it': 'Quadrupla'},
+            'Quíntuplo': {'pt': 'Quíntuplo', 'es': 'Quíntuple', 'en': 'Quintuple', 'it': 'Quintupla'},
+            'Sextuplo': {'pt': 'Sextuplo', 'es': 'Séxtuple', 'en': 'Sextuple', 'it': 'Sestupla'}
+        }
+        nome_tag = nome_map[nome_pousada][code]
+        quarto_tag = qt_map[tipo_quarto][code]
+
+        resumo = f"🏡 {nome_tag}\n"
+        resumo += f"📍 {('Address' if code == 'en' else 'Dirección' if code == 'es' else 'Endereço' if code == 'pt' else 'Indirizzo')}: {enderecos[nome_pousada]}\n"
+
+        # **Insira aqui o tipo de quarto**:
+        resumo += f"🛏️ {quarto_tag}\n"
+
+        resumo += f"📅 {('Stay Dates' if code == 'en' else 'Fechas de la estancia' if code == 'es' else 'Datas da Estadia' if code == 'pt' else 'Date del soggiorno')}\n"
+        resumo += f"➡️ {('Check-In' if code == 'en' else 'Check-In' if code == 'pt' else 'Salida' if code == 'es' else 'Arrivo')} : {checkin_data} ({d_in_sem}) 14:00\n"
+        resumo += f"➡️ {('Check-Out' if code == 'en' else 'Check-Out' if code == 'pt' else 'Salida' if code == 'es' else 'Partenza')}: {checkout_data} ({d_out_sem}) 12:00\n"
+        resumo += f"➡️ {diarias} {l_noite if diarias == 1 else l_noites}\n"
+        resumo += f"➡️ {pax} {('guest' if code == 'en' and pax == '1' else 'guests' if code == 'en' else 'persona' if code == 'es' and pax == '1' else 'personas' if code == 'es' else 'pessoa' if code == 'pt' and pax == '1' else 'pessoas' if code == 'pt' else 'ospite' if code == 'it' and pax == '1' else 'ospiti')}\n"
+        resumo += f"💵 {('Total Price' if code == 'en' else 'Precio Total' if code == 'es' else 'Valor Total' if code == 'pt' else 'Valore Totale')}: {valor_total}\n"
+        resumo += l_cafe + "\n"
+
+        resultado.delete('1.0', tk.END)
+        resultado.insert(tk.END, resumo)
+
+    def copiar():
+        pyperclip.copy(resultado.get('1.0', tk.END).strip())
+        messagebox.showinfo('Copiado', 'Texto copiado!')
+
+    def atualizar_quartos(e):
+        combo_quarto['values'] = tipos_quarto['JOAO_FERNANDES'] if 'SOLAR' in combo_pousada.get().upper() else tipos_quarto['POUSADA']
+
+    win = tk.Toplevel()
+    win.title('Cotação')
+    win.iconbitmap(ICON_ICO)
+    win.geometry('500x650')
+    win.configure(bg='#1E1E1E')  # Um preto mais suave
+    win.resizable(False, False)
+
+    tk.Label(win, text='Cole o texto da cotação copiado do Cloudbeds:', bg='#1E1E1E', fg='white').pack(pady=10)
+    area_texto = tk.Text(win, height=5, width=60, bg='black', fg='white')
+    area_texto.pack()
+
+    # Criação de um frame para agrupar os widgets de entrada
+    frame = tk.Frame(win, bg='#f4f4f9')  # Define a cor de fundo do frame
+    frame.pack(pady=10)  # Adiciona o frame à janela com um espaçamento vertical
+
+    # Label e Combobox para selecionar a pousada
+    tk.Label(frame, text='Escolha a pousada, a quantidade de pessoas, o tipo de quarto e idioma.:', bg='#1E1E1E', fg='white').grid(row=0, column=0, sticky='e')
+    # Rótulo alinhado à direita
+    # Criação de um frame para agrupar os widgets de entrada
+    frame = tk.Frame(win, bg='#1E1E1E')
+    frame.pack(pady=10)
+
+    # 1) Label e Combobox de Pousada
+    tk.Label(frame, text='Pousada:', bg='#1E1E1E', fg='white').grid(row=0, column=0, sticky='e')
+    combo_pousada = ttk.Combobox(frame, values=list(enderecos.keys()), state='readonly')
+    combo_pousada.grid(row=0, column=1, padx=5, pady=2)
+
+    # 2) Label e Entry de Pessoas
+    tk.Label(frame, text='Pessoas:', bg='#1E1E1E', fg='white').grid(row=1, column=0, sticky='e')
+    entrada_pessoas = ttk.Entry(frame)
+    entrada_pessoas.grid(row=1, column=1, padx=5, pady=2)
+
+    # 3) Label e Combobox de Tipo de Quarto
+    tk.Label(frame, text='Tipo de Quarto:', bg='#1E1E1E', fg='white').grid(row=2, column=0, sticky='e')
+    combo_quarto = ttk.Combobox(frame, state='readonly')
+    combo_quarto.grid(row=2, column=1, padx=5, pady=2)
+
+    # 4) Label e Combobox de Idioma
+    tk.Label(frame, text='Idioma:', bg='#1E1E1E', fg='white').grid(row=3, column=0, sticky='e')
+    combo_idioma = ttk.Combobox(frame,
+                                values=['Português','Español','English','Italiano'],
+                                state='readonly')
+    combo_idioma.current(0)
+    combo_idioma.grid(row=3, column=1, padx=5, pady=2)
+
+    tk.Button(win, text='Processar', command=processar_dados, bg='#2196F3', fg='white', font=('Arial', 10, 'bold'),padx=10, pady=5).pack(pady=5)
+
+    # Função de atualização de quartos
+    def atualizar_quartos(e=None):
+        if 'SOLAR' in combo_pousada.get().upper():
+            combo_quarto['values'] = tipos_quarto['JOAO_FERNANDES']
+        else:
+            combo_quarto['values'] = tipos_quarto['POUSADA']
+
+    # 5) Bind e pré-população
+    combo_pousada.bind('<<ComboboxSelected>>', atualizar_quartos)
+    combo_pousada.current(0)      # seleciona a primeira pousada
+    atualizar_quartos()           # popula o combo_quarto na abertura
+    combo_quarto.current(0)       # (opcional) seleciona o primeiro tipo de quarto
+
+    resultado = tk.Text(win, height=12, width=60, font=('Arial',10))
+    resultado.pack(pady=10)
+    tk.Button(win, text='Copiar Cotação', command=copiar, bg='#4CAF50', fg='white').pack()
+
+# Janela principal
+janela = tk.Tk()
+janela.title('Painel de Pousadas')
+janela.iconbitmap(ICON_ICO)
+janela.geometry('350x490')
+janela.resizable(False, False)
+janela.bind('<Control-Shift-L>', bind_atalho_reexibir)
+
+# Agora sim carregue a imagem e crie o PhotoImage
+fundo_img = Image.open(os.path.join(base_path, 'imagem', 'fundo.png'))
+fundo_img.thumbnail((350, 470))  # Mantém proporção
+fundo_tk = ImageTk.PhotoImage(fundo_img, master=janela)
+
+# E coloque o label de fundo
+label_fundo = tk.Label(janela, image=fundo_tk)
+label_fundo.place(x=0, y=0, relwidth=1, relheight=1)
+
+label_header = tk.Label(
+    janela,
+    text='G4',
+    font=('Arial', 10, 'bold'),
+    bg='#1E1E1E',  # mesma cor do frame ou janela
+    fg='#1E1E1E',  # texto amarelo
+    pady=4
+)
+label_header.pack(pady=(16, 5))
+
+
+
+# Frame do botão de configurações
+frame_config = tk.Frame(janela, bg='#f4f4f9')
+frame_config.pack(fill='x', pady=(5, 0), padx=10, anchor='ne')
+
+settings_btn = tk.Button(
+    frame_config, text='⚙️', command=show_info,
+    bg='#f4f4f9', relief='flat', font=('Arial', 12)
+)
+settings_btn.pack(anchor='e')
+
+# Frame dos botões das pousadas
+frame_btn = tk.Frame(janela, bg='#1E1E1E')
+frame_btn.pack(pady=10)
+
+# Novo layout usando grid para permitir botão ao lado do Solar João Fernandes
+row = 0
+for nome, link in pousadas.items():
+    if nome == "SOLAR JOÃO FERNANDES":
+        # Botão principal (mais fino também ajustável alterando width)
+        tk.Button(
+            frame_btn, text=nome, width=25, height=2,
+            bg='#4CAF50', fg='white', relief='flat',
+            font=('Arial', 10, 'bold'),
+            command=lambda url=link: abrir_painel(url)
+        ).grid(row=row, column=0, padx=5, pady=5)
+
+        # Botão extra mais fino ao lado
+        tk.Button(
+            frame_btn,
+            text="Lofts",  # ou "Enviar Mensagem"
+            width=10,
+            height=2,
+            bg='#FF9800',
+            fg='white',
+            relief='flat',
+            font=('Arial', 10, 'bold'),
+            command=abrir_mensagem_solar  # chama a janela de seleção de lofts e idiomas
+        ).grid(row=row, column=1, padx=5, pady=5)
+    else:
+        # Todos os outros botões ocupam as duas colunas
+        tk.Button(
+            frame_btn, text=nome, width=30, height=2,
+            bg='#4CAF50', fg='white', relief='flat',
+            font=('Arial', 10, 'bold'),
+            command=lambda url=link: abrir_painel(url)
+        ).grid(row=row, column=0, columnspan=2, padx=5, pady=5)
+    row += 1
+
+# Botão "Cotação"
+bt_c = tk.Button(
+    janela, text='Cotação', width=30, height=2,
+    bg='#2196F3', fg='white', font=('Arial', 10, 'bold'),
+    command=abrir_cotacao
+)
+bt_c.pack(pady=(10, 5))
+
+# Botão "Ocultar Painel"
+bt_ocultar = tk.Button(
+    janela, text='Ocultar Painel', width=30, height=2,
+    bg='#FF5722', fg='white', font=('Arial', 10, 'bold'),
+    command=ocultar_painel
+)
+bt_ocultar.pack(pady=(0, 10))
+
+# Ícone da bandeja
+threading.Thread(target=create_tray_icon, daemon=True).start()
+
+# Iniciar a janela
+janela.mainloop()
+

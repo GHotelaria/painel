@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel de Pousadas - G Hotelaria</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏨</text></svg>">
+</head>
+<body>
+    <header>
+    <img src="logo.png" alt="Logo G Hotelaria" class="logo-animado" style="height: 168px;">
+</header>
+
+    <main class="container">
+        <!-- Seção 1: Links Rápidos das Pousadas -->
+        <section class="card" id="paineis-pousadas">
+            <h2><span class="icon">🏨</span>          Painéis das Pousadas</h2>
+            <div class="button-grid" id="pousadas-grid">
+                <!-- Os botões serão gerados dinamicamente pelo JavaScript -->
+            </div>
+        </section>
+
+        <!-- Seção 2: Gerador de Cotação -->
+        <section class="card" id="cotacao">
+            <h2><span class="icon">💲</span> Gerador de Cotação</h2>
+            
+            <div class="form-group">
+                <label for="texto-cloudbeds">Cole o texto da cotação do Cloudbeds aqui:</label>
+                <textarea id="texto-cloudbeds" rows="4" placeholder="Ex: Sex, Maio 10 - Dom, Maio 12 ... R$ 1234,56"></textarea>
+            </div>
+            
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="cotacao-pousada">Pousada:</label>
+                    <select id="cotacao-pousada">
+                        <!-- Opções serão preenchidas pelo JavaScript -->
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="cotacao-pax">Nº de Pessoas:</label>
+                    <input type="number" id="cotacao-pax" min="1" value="2">
+                </div>
+                <div class="form-group">
+                    <label for="cotacao-quarto">Tipo de Quarto:</label>
+                    <select id="cotacao-quarto">
+                        <!-- Opções serão preenchidas pelo JavaScript -->
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="cotacao-idioma">Idioma:</label>
+                    <select id="cotacao-idioma">
+                        <option value="Português">Português</option>
+                        <option value="Español">Español</option>
+                        <option value="English">English</option>
+                        <option value="Italiano">Italiano</option>
+                    </select>
+                </div>
+            </div>
+            
+            <button id="btn-processar-cotacao" class="btn-principal">🔄 Gerar Cotação</button>
+            
+            <div class="resultado-container">
+                <label>Resultado da Cotação:</label>
+                <div class="textarea-wrapper">
+                    <textarea id="resultado-cotacao" rows="12" readonly placeholder="A cotação aparecerá aqui após o processamento..."></textarea>
+                    <button id="btn-copiar-cotacao" class="btn-copiar" title="Copiar cotação">📋</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Seção 3: Mensagens para Lofts (Solar João Fernandes) -->
+        <section class="card" id="mensagens-lofts">
+            <h2><span class="icon">💬</span> Mensagens Lofts - Solar João Fernandes</h2>
+            
+            <div class="form-group">
+                <label for="lofts-idioma">Idioma:</label>
+                <select id="lofts-idioma">
+                    <option value="Português">Português</option>
+                    <option value="Español">Español</option>
+                    <option value="English">English</option>
+                    <option value="Italiano">Italiano</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>Clique no número do Loft para gerar a mensagem:</label>
+                <div id="lofts-botoes" class="lofts-grid">
+                    <!-- Botões dos lofts (01 a 08) serão gerados aqui -->
+                </div>
+            </div>
+            
+            <div class="resultado-container">
+                <label>Mensagem do Loft:</label>
+                <div class="textarea-wrapper">
+                    <textarea id="resultado-lofts" rows="15" readonly placeholder="Selecione um loft para gerar a mensagem..."></textarea>
+                    <button id="btn-copiar-lofts" class="btn-copiar" title="Copiar mensagem">📋</button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>Desenvolvido por Christiano P. Marcos - Recepção G Hotelaria</p>
+        <p>Sistema de gestão integrada para pousadas em Búzios</p>
+    </footer>
+
+    <!-- Toast para notificações -->
+    <div id="toast" class="toast">
+        <span id="toast-message"></span>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
+
