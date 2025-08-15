@@ -423,7 +423,7 @@ Grazie mille! Siamo a tua disposizione e in contatto.`
 
         try {
             // Regex melhorado para extrair datas e valor
-            const datasRegex = /(\w{3}),\s*([\wçÇáéíóúãõâêô]+)\.?\s*(\d{1,2})\s*-\s*(\w{3}),\s*([\wçÇáéíóúãõâêô]+)\.?\s*(\d{1,2})/i;
+            const datasRegex = /([\wÀ-ÿ]{3}),\s*([\wÀ-ÿ]+)\.?\s*(\d{1,2})\s*-\s*([\wÀ-ÿ]{3}),\s*([\wÀ-ÿ]+)\.?\s*(\d{1,2})/i;
             const valorRegex = /R\$\s?(\d{1,3}(?:\.\d{3})*,\d{2}|\d+,\d{2}|\d+)/;
 
             const datasMatch = texto.match(datasRegex);
