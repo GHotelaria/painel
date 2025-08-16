@@ -447,12 +447,32 @@ Grazie mille! Siamo a tua disposizione e in contatto.`
             }
 
             // Formata as datas
-            const checkinData = `${diaIn.padStart(2, '0')}/${mesInNum}/2025`;
-            const checkoutData = `${diaOut.padStart(2, '0')}/${mesOutNum}/2025`;
+            const mesAtual = 8; // Agosto
+            const anoAtual = 2025;
 
-            // Calcula número de diárias
-            const checkinDT = new Date(`2025-${mesInNum}-${diaIn}`);
-            const checkoutDT = new Date(`2025-${mesOutNum}-${diaOut}`);
+            let anoCheckin = anoAtual;
+            let anoCheckout = anoAtual;
+
+            // Se o mês de entrada for menor que agosto, já é para o próximo ano
+            if (parseInt(mesInNum) < mesAtual) {
+                anoCheckin = anoAtual + 1;
+            }
+
+            // Se o mês de saída for menor que agosto, já é para o próximo ano
+            if (parseInt(mesOutNum) < mesAtual) {
+                anoCheckout = anoAtual + 1;
+            }
+
+            // Se o mês de saída for menor que o mês de entrada, é virada de ano
+            if (parseInt(mesOutNum) < parseInt(mesInNum)) {
+                anoCheckout = anoCheckin + 1;
+            }
+
+            const checkinData = `${diaIn.padStart(2, '0')}/${mesInNum}/${anoCheckin}`;
+            const checkoutData = `${diaOut.padStart(2, '0')}/${mesOutNum}/${anoCheckout}`;
+
+            const checkinDT = new Date(`${anoCheckin}-${mesInNum}-${diaIn}`);
+            const checkoutDT = new Date(`${anoCheckout}-${mesOutNum}-${diaOut}`);
             const diarias = Math.round((checkoutDT - checkinDT) / (1000 * 60 * 60 * 24));
 
             if (diarias <= 0) {
@@ -507,6 +527,71 @@ Aguardamos você! 🌟`;
             mostrarToast('Erro ao processar a cotação. Tente novamente.', 'error');
         }
     }
+
+    // Lógica da Calculadora de Porcentagem
+    document.getElementById('btnCalcularPorcentagem').addEventListener('click', function() {
+        const totalReserva = parseFloat(document.getElementById('totalReserva').value);
+        const porcentagem = parseFloat(document.getElementById('porcentagem').value);
+        const resultadoContainer = document.getElementById('resultadoPorcentagem');
+        const valorCalculadoEl = document.getElementById('valorCalculado');
+        const valorFinalEl = document.getElementById('valorFinal');
+
+        if (isNaN(totalReserva) || isNaN(porcentagem)) {
+            mostrarToast('Por favor, insira valores numéricos válidos.', 'error');
+            return;
+        }
+
+        const valorCalculado = (totalReserva * porcentagem) / 100;
+        const valorFinal = totalReserva - valorCalculado;
+
+        valorCalculadoEl.textContent = `R$ ${valorCalculado.toFixed(2)}`;
+        valorFinalEl.textContent = `R$ ${valorFinal.toFixed(2)}`;
+
+        resultadoContainer.style.display = 'block';
+    });
+
+    // Lógica do Conversor de Moedas
+    document.getElementById('btnConverterMoeda').addEventListener('click', function() {
+        const valorBRL = parseFloat(document.getElementById('valorBRL').value);
+        const moedaDestino = document.getElementById('moedaDestino').value;
+        const resultadoContainer = document.getElementById('resultadoConversao');
+        const valorConvertidoEl = document.getElementById('valorConvertido');
+        const taxaCambioInfoEl = document.getElementById('taxaCambioInfo');
+
+        if (isNaN(valorBRL)) {
+            mostrarToast('Por favor, insira um valor válido em Reais.', 'error');
+            return;
+        }
+
+        const apiUrl = `https://api.exchangerate-api.com/v4/latest/BRL`;
+
+        valorConvertidoEl.textContent = 'Calculando...';
+        taxaCambioInfoEl.textContent = '';
+        resultadoContainer.style.display = 'block';
+
+        fetch(apiUrl)
+            .then(response => response.json())
+            .then(data => {
+                const taxa = data.rates[moedaDestino];
+                const dataAtualizacao = new Date(data.time_last_updated * 1000).toLocaleDateString('pt-BR');
+
+                if (taxa) {
+                    const valorConvertido = valorBRL * taxa;
+                    valorConvertidoEl.textContent = new Intl.NumberFormat('pt-BR', {
+                        style: 'currency',
+                        currency: moedaDestino
+                    }).format(valorConvertido);
+
+                    taxaCambioInfoEl.textContent = `Taxa: 1 BRL = ${taxa.toFixed(4)} ${moedaDestino} (Atualizado em: ${dataAtualizacao})`;
+                } else {
+                    valorConvertidoEl.textContent = 'Erro ao buscar a taxa.';
+                }
+            })
+            .catch(error => {
+                console.error('Erro ao buscar dados da API:', error);
+                valorConvertidoEl.textContent = 'Não foi possível conectar ao serviço de câmbio.';
+            });
+    });
 
     // =================================================
     // EVENT LISTENERS
