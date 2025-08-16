@@ -15,7 +15,7 @@
     <main class="container">
         <!-- Seção 1: Links Rápidos das Pousadas -->
         <section class="card" id="paineis-pousadas">
-            <h2><span class="icon">🏨</span>          Painéis das Pousadas</h2>
+            <h2><span class="icon">🏨</span> Painéis das Pousadas</h2>
             <div class="button-grid" id="pousadas-grid">
                 <!-- Os botões serão gerados dinamicamente pelo JavaScript -->
             </div>
@@ -97,6 +97,50 @@
                     <button id="btn-copiar-lofts" class="btn-copiar" title="Copiar mensagem">📋</button>
                 </div>
             </div>
+        </section>
+
+        <!-- Seção da Calculadora de Porcentagem -->
+        <section class="card" id="calculadora-porcentagem">
+            <h2><span class="icon">🧮</span> Calculadora de Porcentagem</h2>
+            <div class="form-group">
+                <label for="totalReserva">Valor Total da Reserva (R$)</label>
+                <input type="number" id="totalReserva" placeholder="Ex: 1500.00">
+            </div>
+            <div class="form-group">
+                <label for="porcentagem">Porcentagem a Aplicar (%)</label>
+                <input type="number" id="porcentagem" placeholder="Ex: 10">
+            </div>
+            <button id="btnCalcularPorcentagem" class="btn-principal">Calcular</button>
+            <div class="resultado-container" id="resultadoPorcentagem" style="display: none;">
+                <h3>Resultados:</h3>
+                <p><strong>Valor do Desconto/Comissão:</strong> <span id="valorCalculado"></span></p>
+                <p><strong>Valor Final (com desconto):</strong> <span id="valorFinal"></span></p>
+            </div>
+        </section>
+
+        <!-- Seção do Conversor de Moedas -->
+        <section class="card" id="conversor-moedas">
+            <h2><span class="icon">💱</span> Conversor de Moedas</h2>
+            <div class="form-group">
+                <label for="valorBRL">Valor em Reais (BRL)</label>
+                <input type="number" id="valorBRL" placeholder="Ex: 550.00">
+            </div>
+            <div class="form-group">
+                <label for="moedaDestino">Converter para:</label>
+                <select id="moedaDestino">
+                    <option value="USD">Dólar Americano (USD)</option>
+                    <option value="EUR">Euro (EUR)</option>
+                    <option value="ARS">Peso Argentino (ARS)</option>
+                </select>
+            </div>
+            <button id="btnConverterMoeda" class="btn-principal">Converter</button>
+            <div class="resultado-container" id="resultadoConversao" style="display: none;">
+                <p><strong>Valor Convertido:</strong> <span id="valorConvertido"></span></p>
+                <small id="taxaCambioInfo"></small>
+            </div>
+            <small class="fonte-info">
+                Taxas de câmbio fornecidas por <a href="https://www.exchangerate-api.com" target="_blank">ExchangeRate-API.com</a>.
+            </small>
         </section>
     </main>
 
