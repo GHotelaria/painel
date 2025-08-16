@@ -644,4 +644,3 @@ Aguardamos você! 🌟`;
 
     console.log('🏨 Painel de Pousadas G Hotelaria carregado com sucesso!');
 });
-
