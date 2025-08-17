@@ -530,3 +530,131 @@ footer p:last-child {
     text-decoration: underline;
 }
 
+/* --- Estilos da Seção de Inventário --- */
+.inventory-selectors {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.btn-inventario {
+    background-color: #3a3a3a;
+    color: #ccc;
+    border: 1px solid #555;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-inventario:hover:not(:disabled) {
+    background-color: #00aaff;
+    color: #fff;
+    border-color: #00aaff;
+}
+
+.btn-inventario.active {
+    background-color: #0077cc;
+    color: white;
+    border-color: #00aaff;
+}
+
+.btn-inventario:disabled {
+    background-color: #2c2c2c;
+    color: #666;
+    cursor: not-allowed;
+}
+
+.quartos-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px;
+}
+
+.btn-quarto {
+    background-color: #444;
+    color: #fff;
+    border: none;
+    width: 60px;
+    height: 60px;
+    font-size: 1.2em;
+    font-weight: bold;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.btn-quarto:hover {
+    background-color: #555;
+    transform: translateY(-3px);
+}
+
+/* --- Estilos do Modal (Card de Inventário) --- */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background-color: #2a2a2a;
+    padding: 30px;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 450px;
+    position: relative;
+    border: 1px solid #444;
+    box-shadow: 0 5px 25px rgba(0,0,0,0.5);
+}
+
+.modal-close {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    font-size: 28px;
+    color: #aaa;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.modal-close:hover {
+    color: #fff;
+}
+
+#modal-quarto-titulo {
+    color: #00aaff;
+    margin-top: 0;
+    margin-bottom: 20px;
+    text-align: center;
+    font-size: 1.8em;
+}
+
+.inventory-details p {
+    margin: 10px 0;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #3a3a3a;
+    display: flex;
+    justify-content: space-between;
+}
+.inventory-details p:last-child {
+    border-bottom: none;
+}
+
+.inventory-details strong {
+    color: #ccc;
+}
+
+.inventory-details span {
+    color: #fff;
+    text-align: right;
+}
+
