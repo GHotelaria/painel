@@ -133,7 +133,7 @@ Thank you very much! We are at your disposal and in touch.`,
 Hai una prenotazione al SOLAR JOÃO FERNANDES.
 
 🎒 A CHE ORA POSSO FARE IL CHECK-IN?
-Il check-in è dalle 14:00, senza eccezioni.
+Il check-in è dalle 14:00, senza ecceções.
 
 👉 COME ARRIVO?
 https://www.google.com/maps/place/22%C2%B045'03.8%22S+41%C2%B052'40.8%22W/@-22.751049,-41.880578,17z/data=!3m1!4b1!4m4!3m3!8m2!3d-22.751049!4d-41.8780031?hl=it&entry=ttu
@@ -593,6 +593,102 @@ Aguardamos você! 🌟`;
             });
     });
 
+    // ================= Lógica do Inventário de Quartos =================
+
+    const inventarioData = {
+        "centro-class": {
+            nome: "Pousada Centro Class",
+            quartos: {
+                "01": { Camas: "1 casal + 1 solteiro", TV: "HQ TV + Controle HQ", "Controle de canais": "Vivensis", Ar: "Samsung + Controle Samsung", Espelho: "Grande", Abajur: "1", Cofre: "Não funcional" },
+                "02": { Camas: "1 casal + 1 solteiro", TV: "HQ TV + Controle HQ", "Controle de canais": "Vivensis", Ar: "Samsung + Controle Samsung", Espelho: "Grande", Abajur: "1", Cofre: "Não funcional" },
+                "03": { Camas: "1 casal + 1 solteiro", TV: "Toshiba + Controle Toshiba", "Controle de canais": "Vivensis", Ar: "Samsung + Controle Samsung", Espelho: "Sim", Abajur: "1", Cofre: "Funcional" },
+                "04": { Camas: "1 casal + 1 solteiro", TV: "HQ TV + Controle HQ", "Controle de canais": "Vivensis", Ar: "Agratto + Controle branco Agratto", Espelho: "Grande", Abajur: "1", Cofre: "Funcional" },
+                "05": { Camas: "1 casal + 1 solteiro", TV: "HQ TV + Controle HQ", "Controle de canais": "Vivensis", Ar: "Samsung + Controle Samsung", Espelho: "Sim", Abajur: "2", Cofre: "Não funcional" },
+                "06": { Camas: "1 casal", TV: "Philco TV + Controle Philco", "Controle de canais": "Vivensis", Ar: "Samsung + Controle universal", Espelho: "Sem", Abajur: "1", Cofre: "Não funcional" },
+                "07": { Camas: "1 casal", TV: "Philco TV + Controle Philco", "Controle de canais": "Vivensis", Ar: "Samsung + Controle Samsung", Espelho: "Grande", Abajur: "2", Cofre: "Não possui" },
+                "08": { Camas: "1 casal", TV: "HQ TV + Controle HQ", "Controle de canais": "Vivensis", Ar: "Samsung + Controle universal", Espelho: "Sim", Abajur: "2", Cofre: "Não possui" },
+                "09": { Camas: "1 casal", TV: "Philco TV + Controle Philco", "Controle de canais": "Vivensis", Ar: "Comfee + Controle universal", Espelho: "Sim", Abajur: "+2", Cofre: "Não possui" },
+                "10": { Camas: "Sem informações ainda" }
+            }
+        },
+        "casa-centro": {
+            nome: "Pousada Casa Centro",
+            quartos: { /* Adicione os quartos da Casa Centro aqui quando tiver */ }
+        },
+        "centro-up": {
+            nome: "Pousada Centro Up",
+            quartos: { /* Adicione os quartos da Centro Up aqui quando tiver */ }
+        }
+    };
+
+    const quartosContainer = document.getElementById('quartos-container');
+    const modal = document.getElementById('inventory-modal');
+    const modalClose = document.querySelector('.modal-close');
+    const modalTitulo = document.getElementById('modal-quarto-titulo');
+    const modalBody = document.getElementById('modal-quarto-body');
+    const pousadaSelectors = document.querySelectorAll('.btn-inventario');
+
+    function displayQuartos(pousadaId) {
+        quartosContainer.innerHTML = '';
+        const pousada = inventarioData[pousadaId];
+        if (!pousada || Object.keys(pousada.quartos).length === 0) {
+            quartosContainer.innerHTML = '<p style="color: #888;">Nenhum quarto cadastrado para esta pousada.</p>';
+            return;
+        }
+        // Ordena os quartos numericamente
+        Object.keys(pousada.quartos).sort((a, b) => Number(a) - Number(b)).forEach(numeroQuarto => {
+            const btn = document.createElement('button');
+            btn.className = 'btn-quarto';
+            btn.textContent = numeroQuarto;
+            btn.onclick = () => showInventoryModal(pousadaId, numeroQuarto);
+            quartosContainer.appendChild(btn);
+        });
+    }
+
+    function showInventoryModal(pousadaId, numeroQuarto) {
+        const pousada = inventarioData[pousadaId];
+        const quarto = pousada.quartos[numeroQuarto];
+        modalTitulo.textContent = `${pousada.nome} - Quarto ${numeroQuarto}`;
+        modalBody.innerHTML = '';
+        for (const item in quarto) {
+            let label = item;
+            let valor = quarto[item];
+            // Ajusta para Espelho grande
+            if (item === "Espelho" && valor.toLowerCase() === "grande") {
+                label = "Espelho grande";
+                valor = "SIM";
+            }
+            const p = document.createElement('p');
+            p.innerHTML = `<strong>${label}:</strong> <span>${valor}</span>`;
+            modalBody.appendChild(p);
+        }
+        modal.style.display = 'flex';
+    }
+
+    pousadaSelectors.forEach(button => {
+        button.addEventListener('click', () => {
+            if (button.disabled) return;
+            pousadaSelectors.forEach(btn => btn.classList.remove('active'));
+            button.classList.add('active');
+            const pousadaId = button.getAttribute('data-pousada');
+            displayQuartos(pousadaId);
+        });
+    });
+
+    modalClose.onclick = () => modal.style.display = 'none';
+    window.onclick = (event) => {
+        if (event.target == modal) {
+            modal.style.display = 'none';
+        }
+    };
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const firstEnabledPousada = document.querySelector('.btn-inventario:not(:disabled)');
+        if (firstEnabledPousada) {
+            firstEnabledPousada.click();
+        }
+    });
+
     // =================================================
     // EVENT LISTENERS
     // =================================================
@@ -644,3 +740,4 @@ Aguardamos você! 🌟`;
 
     console.log('🏨 Painel de Pousadas G Hotelaria carregado com sucesso!');
 });
+
