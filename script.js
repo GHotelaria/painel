@@ -613,7 +613,56 @@ Aguardamos você! 🌟`;
         },
         "casa-centro": {
             nome: "Pousada Casa Centro",
-            quartos: { /* Adicione os quartos da Casa Centro aqui quando tiver */ }
+            quartos: {
+                "01": {
+                    Cama: "Casal",
+                    "TV + Controle": "Philco + Philco",
+                    "Controle de canais": "Vivensis",
+                    "Ar + Controle": "EOS + EOS",
+                    "Espelho grande": "Sim",
+                    Abajur: "2"
+                },
+                "03": {
+                    Cama: "Casal",
+                    "TV + Controle": "HQ + HQ",
+                    "Controle de canais": "Vivensis",
+                    "Ar + Controle": "Consul + Consul",
+                    "Espelho grande": "Sim",
+                    Abajur: "2"
+                },
+                "04": {
+                    Cama: "Casal",
+                    "TV + Controle": "Toshiba + Toshiba",
+                    "Controle de canais": "Vivensis",
+                    "Ar + Controle": "Philco + Philco",
+                    "Espelho grande": "Sim",
+                    Abajur: "2"
+                },
+                "05": {
+                    Cama: "Casal",
+                    "TV + Controle": "Philco + Philco",
+                    "Controle de canais": "Vivensis",
+                    "Ar + Controle": "Consul + Consul",
+                    "Espelho grande": "Sim",
+                    Abajur: "2"
+                },
+                "06": {
+                    Cama: "1 Casal + 1 Solteiro",
+                    "TV + Controle": "LG + LG",
+                    "Controle de canais": "Vivensis",
+                    "Ar + Controle": "Midea + Controle universal",
+                    "Espelho grande": "Não",
+                    Abajur: "Não"
+                },
+                "07": {
+                    Cama: "Casal",
+                    "TV + Controle": "HQ + HQ",
+                    "Controle de canais": "Vivensis",
+                    "Ar + Controle": "Philco + Philco",
+                    "Espelho grande": "Sim",
+                    Abajur: "1"
+                }
+            }
         },
         "centro-up": {
             nome: "Pousada Centro Up",
