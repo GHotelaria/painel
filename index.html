@@ -12,13 +12,15 @@
     <a class="brand" href="#inicio" aria-label="G Hotelaria">
       <span class="brand-mark">G</span><span><strong>G Hotelaria</strong><small>painel de operação</small></span>
     </a>
+    <div class="welcome-control"><label for="userName">Qual teu nome?</label><input id="userName" type="text" autocomplete="given-name" placeholder="Digite aqui"></div>
+    <div id="greeting" class="greeting" aria-live="polite"></div>
     <nav aria-label="Navegação principal">
       <a href="#pousadas">Pousadas</a><a href="#calendario">Calendário</a><a href="#ferramentas">Ferramentas</a>
     </nav>
   </header>
 
   <main id="inicio" class="container">
-    <section class="hero"><div><p class="kicker">OPERAÇÃO DE HOJE · <span id="todayLabel"></span></p><h1>G Hotelaria</h1><p>Um painel simples para a recepção trabalhar com agilidade.</p></div><div class="hero-mark">G</div></section>
+    <section class="hero"><div><p class="kicker">OPERAÇÃO DE HOJE · <span id="todayLabel"></span></p><h1>Acesso rápido às pousadas e ferramentas.</h1><p>Um painel simples para a recepção trabalhar com agilidade.</p></div><div class="hero-mark">G</div></section>
 
     <section id="pousadas" class="section"><div class="section-title"><div><p class="kicker">ACESSO PRINCIPAL</p><h2>Painéis das pousadas</h2></div><span>Escolha uma pousada</span></div><div id="propertyGrid" class="property-grid"></div></section>
 
@@ -28,7 +30,7 @@
 
     <section id="ferramentas" class="section tools"><div class="section-title"><div><p class="kicker">ROTINAS DA RECEPÇÃO</p><h2>Ferramentas rápidas</h2></div><span>Prontas para copiar e enviar</span></div><div class="tools-grid">
       <article class="tool-card quote-card"><h3>Gerador de cotação</h3><p>Transforme os dados da Cloudbeds numa mensagem completa.</p><div class="fields"><label>Pousada<select id="quoteProperty"></select></label><label>Pessoas<input id="quoteGuests" type="number" min="1" value="2"></label><label>Tipo de quarto<select id="quoteRoom"><option>Duplo Standard</option><option>Triplo</option></select></label><label>Idioma<select id="quoteLanguage"><option value="pt">Português</option><option value="es">Español</option><option value="en">English</option><option value="it">Italiano</option></select></label></div><textarea id="quoteInput" placeholder="Ex.: Sex, Ago. 21 - Seg, Ago. 24\n\nTotal da Acomodação:\nR$670,00"></textarea><button id="generateQuote" class="primary">Gerar cotação</button><div id="quoteOutput" class="output hidden"><div class="output-head"><strong>Resultado da cotação</strong><button id="copyQuote">Copiar cotação</button></div><textarea id="quoteText" readonly></textarea></div></article>
-      <article class="tool-card"><h3>Mensagem do loft (MANUTENÇÃO)</h3><p>Escolha o loft e copie a mensagem de chegada     (EM MANUTENÇÃO).</p><div id="loftButtons" class="loft-buttons"></div><div class="copy-row"><strong id="loftLabel">Loft 01</strong><button id="copyLoft">Copiar mensagem</button></div></article>
+      <article class="tool-card"><h3>Mensagem do loft</h3><p>Escolha o loft e copie a mensagem de chegada.</p><div id="loftButtons" class="loft-buttons"></div><div class="copy-row"><strong id="loftLabel">Loft 01</strong><button id="copyLoft">Copiar mensagem</button></div></article>
       <article class="tool-card"><h3>Calculadora de comissão</h3><p>Veja o valor líquido rapidamente.</p><div class="fields two"><label>Valor total (R$)<input id="calcTotal" type="number" value="300" min="0"></label><label>Porcentagem (%)<input id="calcPercent" type="number" value="10" min="0"></label></div><div id="calcResult" class="calc-result"></div></article>
       <article class="tool-card"><h3>Conversor de moedas</h3><p>Referência média para atendimento.</p><div class="fields two"><label>Valor em BRL<input id="currencyValue" type="number" value="100" min="0"></label><label>Para<select id="currency"><option value="USD">USD</option><option value="EUR">EUR</option><option value="ARS">ARS</option></select></label></div><div id="currencyResult" class="currency-result"></div><div class="source-list"><span>Consultar outras referências</span><a href="https://wise.com/gb/currency-converter/brl-to-usd-rate" target="_blank" rel="noopener">Wise ↗</a><a href="https://www.xe.com/currencyconverter/convert/?Amount=1&From=BRL&To=USD" target="_blank" rel="noopener">XE ↗</a><a href="https://www.remessaonline.com.br/cotacao/cotacao-dolar" target="_blank" rel="noopener">Remessa Online ↗</a></div></article>
     </div></section>
