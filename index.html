@@ -1,187 +1,39 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel de Pousadas - G Hotelaria</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏨</text></svg>">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#172a3a">
+  <title>G Hotelaria — Painel de operação</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <header>
-    <img src="logo.png" alt="Logo G Hotelaria" class="logo-animado" style="height: 168px;">
-</header>
+  <header class="topbar">
+    <a class="brand" href="#inicio" aria-label="G Hotelaria">
+      <span class="brand-mark">G</span><span><strong>G Hotelaria</strong><small>painel de operação</small></span>
+    </a>
+    <nav aria-label="Navegação principal">
+      <a href="#pousadas">Pousadas</a><a href="#calendario">Calendário</a><a href="#ferramentas">Ferramentas</a>
+    </nav>
+  </header>
 
-    <main class="container">
-        <!-- Seção 1: Links Rápidos das Pousadas -->
-        <section class="card" id="paineis-pousadas">
-            <h2><span class="icon">🏨</span> Painéis das Pousadas</h2>
-            <div class="button-grid" id="pousadas-grid">
-                <!-- Os botões serão gerados dinamicamente pelo JavaScript -->
-            </div>
-        </section>
+  <main id="inicio" class="container">
+    <section class="hero"><div><p class="kicker">OPERAÇÃO DE HOJE · <span id="todayLabel"></span></p><h1>G Hotelaria</h1><p>Um painel simples para a recepção trabalhar com agilidade.</p></div><div class="hero-mark">G</div></section>
 
-        <!-- Seção 2: Inventário dos Quartos -->
-        <section class="card" id="inventario-quartos">
-            <h2><span class="icon">🛏️</span> Inventário dos Quartos</h2>
-            <p>----------------------------------------------------------Clique em uma das pousadas para ver. Atualizado 17/08/2025---------------------------------------------------</p>
-            
-            <div class="inventory-selectors">
-                <button class="btn-inventario" data-pousada="centro-class">Pousada Centro Class</button>
-                <button class="btn-inventario" data-pousada="casa-centro">Pousada Casa Centro</button>
-                <button class="btn-inventario" data-pousada="centro-up" disabled>Pousada Centro Up</button>
-            </div>
+    <section id="pousadas" class="section"><div class="section-title"><div><p class="kicker">ACESSO PRINCIPAL</p><h2>Painéis das pousadas</h2></div><span>Escolha uma pousada</span></div><div id="propertyGrid" class="property-grid"></div></section>
 
-            <div id="quartos-container" class="quartos-grid">
-                <!-- Os botões dos quartos aparecerão aqui -->
-            </div>
-        </section>
+    <section class="holiday-strip"><span>PRÓXIMO FERIADO</span><strong id="nextHoliday"></strong><a href="#calendario">Ver calendário →</a></section>
 
-        <!-- Seção 3: Gerador de Cotação -->
-        <section class="card" id="cotacao">
-            <h2><span class="icon">💲</span> Gerador de Cotação</h2>
-            
-            <div class="form-group">
-                <label for="texto-cloudbeds">Cole o texto da cotação do Cloudbeds aqui:</label>
-                <textarea id="texto-cloudbeds" rows="4" placeholder="Ex: Sex, Maio 10 - Dom, Maio 12 ... R$ 1234,56"></textarea>
-            </div>
-            
-            <div class="form-grid">
-                <div class="form-group">
-                    <label for="cotacao-pousada">Pousada:</label>
-                    <select id="cotacao-pousada">
-                        <!-- Opções serão preenchidas pelo JavaScript -->
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="cotacao-pax">Nº de Pessoas:</label>
-                    <input type="number" id="cotacao-pax" min="1" value="2">
-                </div>
-                <div class="form-group">
-                    <label for="cotacao-quarto">Tipo de Quarto:</label>
-                    <select id="cotacao-quarto">
-                        <!-- Opções serão preenchidas pelo JavaScript -->
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="cotacao-idioma">Idioma:</label>
-                    <select id="cotacao-idioma">
-                        <option value="Português">Português</option>
-                        <option value="Español">Español</option>
-                        <option value="English">English</option>
-                        <option value="Italiano">Italiano</option>
-                    </select>
-                </div>
-            </div>
-            
-            <button id="btn-processar-cotacao" class="btn-principal">🔄 Gerar Cotação</button>
-            
-            <div class="resultado-container">
-                <label>Resultado da Cotação:</label>
-                <div class="textarea-wrapper">
-                    <textarea id="resultado-cotacao" rows="12" readonly placeholder="A cotação aparecerá aqui após o processamento..."></textarea>
-                    <button id="btn-copiar-cotacao" class="btn-copiar" title="Copiar cotação">📋</button>
-                </div>
-            </div>
-        </section>
+    <section id="calendario" class="section planning"><div class="calendar-card"><div class="section-title"><div><p class="kicker">PLANEAMENTO</p><h2>Calendário operacional</h2></div><div class="calendar-nav"><button id="prevMonth" aria-label="Mês anterior">←</button><strong id="monthLabel"></strong><button id="nextMonth" aria-label="Próximo mês">→</button></div></div><div class="weekdays"><span>Seg</span><span>Ter</span><span>Qua</span><span>Qui</span><span>Sex</span><span>Sáb</span><span>Dom</span></div><div id="calendarGrid" class="calendar-grid"></div><p class="legend"><i></i> feriado nacional <b id="selectedHoliday"></b></p></div><aside class="events-card"><p class="kicker">ATENÇÃO</p><h2>Próximas datas</h2><div id="eventsList"></div></aside></section>
 
-        <!-- Seção 4: Mensagens para Lofts (Solar João Fernandes) -->
-        <section class="card" id="mensagens-lofts">
-            <h2><span class="icon">💬</span> Mensagens Lofts - Solar João Fernandes</h2>
-            
-            <div class="form-group">
-                <label for="lofts-idioma">Idioma:</label>
-                <select id="lofts-idioma">
-                    <option value="Português">Português</option>
-                    <option value="Español">Español</option>
-                    <option value="English">English</option>
-                    <option value="Italiano">Italiano</option>
-                </select>
-            </div>
-            
-            <div class="form-group">
-                <label>Clique no número do Loft para gerar a mensagem:</label>
-                <div id="lofts-botoes" class="lofts-grid">
-                    <!-- Botões dos lofts (01 a 08) serão gerados aqui -->
-                </div>
-            </div>
-            
-            <div class="resultado-container">
-                <label>Mensagem do Loft:</label>
-                <div class="textarea-wrapper">
-                    <textarea id="resultado-lofts" rows="15" readonly placeholder="Selecione um loft para gerar a mensagem..."></textarea>
-                    <button id="btn-copiar-lofts" class="btn-copiar" title="Copiar mensagem">📋</button>
-                </div>
-            </div>
-        </section>
-
-        <!-- Seção da Calculadora de Porcentagem -->
-        <section class="card" id="calculadora-porcentagem">
-            <h2><span class="icon">🧮</span> Calculadora de Porcentagem</h2>
-            <div class="form-group">
-                <label for="totalReserva">Valor Total da Reserva (R$)</label>
-                <input type="number" id="totalReserva" placeholder="Ex: 1500.00">
-            </div>
-            <div class="form-group">
-                <label for="porcentagem">Porcentagem a Aplicar (%)</label>
-                <input type="number" id="porcentagem" placeholder="Ex: 10">
-            </div>
-            <button id="btnCalcularPorcentagem" class="btn-principal">Calcular</button>
-            <div class="resultado-container" id="resultadoPorcentagem" style="display: none;">
-                <h3>Resultados:</h3>
-                <p><strong>Valor do Desconto/Comissão:</strong> <span id="valorCalculado"></span></p>
-                <p><strong>Valor Final (com desconto):</strong> <span id="valorFinal"></span></p>
-            </div>
-        </section>
-
-        <!-- Seção do Conversor de Moedas -->
-        <section class="card" id="conversor-moedas">
-            <h2><span class="icon">💱</span> Conversor de Moedas</h2>
-            <div class="form-group">
-                <label for="valorBRL">Valor em Reais (BRL)</label>
-                <input type="number" id="valorBRL" placeholder="Ex: 550.00">
-            </div>
-            <div class="form-group">
-                <label for="moedaDestino">Converter para:</label>
-                <select id="moedaDestino">
-                    <option value="USD">Dólar Americano (USD)</option>
-                    <option value="EUR">Euro (EUR)</option>
-                    <option value="ARS">Peso Argentino (ARS)</option>
-                </select>
-            </div>
-            <button id="btnConverterMoeda" class="btn-principal">Converter</button>
-            <div class="resultado-container" id="resultadoConversao" style="display: none;">
-                <p><strong>Valor Convertido:</strong> <span id="valorConvertido"></span></p>
-                <small id="taxaCambioInfo"></small>
-            </div>
-            <small class="fonte-info">
-                Taxas de câmbio fornecidas por <a href="https://www.exchangerate-api.com" target="_blank">ExchangeRate-API.com</a>.
-            </small>
-        </section>
-
-        <!-- ======================= Modal do Inventário (Card) ======================= -->
-        <div id="inventory-modal" class="modal-overlay" style="display: none;">
-            <div class="modal-content">
-                <span class="modal-close">&times;</span>
-                <h3 id="modal-quarto-titulo"></h3>
-                <div id="modal-quarto-body" class="inventory-details">
-                    <!-- Os detalhes do inventário aparecerão aqui -->
-                </div>
-            </div>
-        </div>
-    </main>
-
-    <footer>
-        <p>Desenvolvido por Christiano P. Marcos - Recepção G Hotelaria</p>
-        <p>Sistema de gestão integrada para pousadas em Búzios</p>
-    </footer>
-
-    <!-- Toast para notificações -->
-    <div id="toast" class="toast">
-        <span id="toast-message"></span>
-    </div>
-
-    <script src="script.js"></script>
+    <section id="ferramentas" class="section tools"><div class="section-title"><div><p class="kicker">ROTINAS DA RECEPÇÃO</p><h2>Ferramentas rápidas</h2></div><span>Prontas para copiar e enviar</span></div><div class="tools-grid">
+      <article class="tool-card quote-card"><h3>Gerador de cotação</h3><p>Transforme os dados da Cloudbeds numa mensagem completa.</p><div class="fields"><label>Pousada<select id="quoteProperty"></select></label><label>Pessoas<input id="quoteGuests" type="number" min="1" value="2"></label><label>Tipo de quarto<select id="quoteRoom"><option>Duplo Standard</option><option>Triplo</option></select></label><label>Idioma<select id="quoteLanguage"><option value="pt">Português</option><option value="es">Español</option><option value="en">English</option><option value="it">Italiano</option></select></label></div><textarea id="quoteInput" placeholder="Ex.: Sex, Ago. 21 - Seg, Ago. 24\n\nTotal da Acomodação:\nR$670,00"></textarea><button id="generateQuote" class="primary">Gerar cotação</button><div id="quoteOutput" class="output hidden"><div class="output-head"><strong>Resultado da cotação</strong><button id="copyQuote">Copiar cotação</button></div><textarea id="quoteText" readonly></textarea></div></article>
+      <article class="tool-card"><h3>Mensagem do loft (MANUTENÇÃO)</h3><p>Escolha o loft e copie a mensagem de chegada     (EM MANUTENÇÃO).</p><div id="loftButtons" class="loft-buttons"></div><div class="copy-row"><strong id="loftLabel">Loft 01</strong><button id="copyLoft">Copiar mensagem</button></div></article>
+      <article class="tool-card"><h3>Calculadora de comissão</h3><p>Veja o valor líquido rapidamente.</p><div class="fields two"><label>Valor total (R$)<input id="calcTotal" type="number" value="300" min="0"></label><label>Porcentagem (%)<input id="calcPercent" type="number" value="10" min="0"></label></div><div id="calcResult" class="calc-result"></div></article>
+      <article class="tool-card"><h3>Conversor de moedas</h3><p>Referência média para atendimento.</p><div class="fields two"><label>Valor em BRL<input id="currencyValue" type="number" value="100" min="0"></label><label>Para<select id="currency"><option value="USD">USD</option><option value="EUR">EUR</option><option value="ARS">ARS</option></select></label></div><div id="currencyResult" class="currency-result"></div><div class="source-list"><span>Consultar outras referências</span><a href="https://wise.com/gb/currency-converter/brl-to-usd-rate" target="_blank" rel="noopener">Wise ↗</a><a href="https://www.xe.com/currencyconverter/convert/?Amount=1&From=BRL&To=USD" target="_blank" rel="noopener">XE ↗</a><a href="https://www.remessaonline.com.br/cotacao/cotacao-dolar" target="_blank" rel="noopener">Remessa Online ↗</a></div></article>
+    </div></section>
+  </main>
+  <footer>G Hotelaria · Painel de operação · Feito para a recepção de Búzios</footer>
+  <script src="script.js"></script>
 </body>
 </html>
-
