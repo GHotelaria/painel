@@ -39,6 +39,53 @@ const monthNames={en:['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct
 function quoteDate(date,lang){const dd=String(date.getDate()).padStart(2,'0'), mm=String(date.getMonth()+1).padStart(2,'0'), yyyy=date.getFullYear(), day=weekdayNames[lang][date.getDay()]; if(lang==='en') return `${day}, ${monthNames.en[date.getMonth()]} ${date.getDate()}, ${yyyy}`; return `${day}, ${dd}/${mm}/${yyyy}`;}
 function quoteMoney(value,lang){return lang==='en'?`R$ ${Number(value).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}`:brl(value);}
 function generateQuote(){ try{ const p=pousadas[Number($('quoteProperty').value)], q=parseQuote($('quoteInput').value), guests=$('quoteGuests').value, selectedRoom=$('quoteRoom').value, selectedLanguage=$('quoteLanguage').value.toLowerCase(), lang=selectedLanguage==='en'||selectedLanguage.includes('english')?'en':selectedLanguage==='es'||selectedLanguage.includes('español')||selectedLanguage.includes('espanol')?'es':selectedLanguage==='it'||selectedLanguage.includes('italiano')?'it':'pt', t=quoteLocale[lang], room=t.room[selectedRoom]||selectedRoom, nightsLabel=q.nights===1?t.night:t.nights, guestsLabel=Number(guests)===1?t.guest:t.guests; const text=`🏡 POUSADA ${p.name.toUpperCase()}\n📍 ${t.address}: ${p.address}\n📍 ${t.location}: ${p.map}\n\n🛏️ **${room}**\n\n📅 **${t.dates}**\n➡️ ${t.checkin}: ${quoteDate(q.start,lang)}\n\n- ${t.checkin}: ${t.timeIn}\n  ⬅️ ${t.checkout}: ${quoteDate(q.end,lang)}\n- ${t.checkout}: ${t.timeOut}\n\n📊 **${t.summary}**\n🌙 ${q.nights} ${nightsLabel}\n👥 ${guests} ${guestsLabel}\n❤️ ${t.breakfast}\n\n💰 **${t.total}: ${quoteMoney(q.total,lang)}**\n\n⚠️ *${t.nonRefundable}*\n\n📷 **${t.photos}:**\n${p.photos}\n\n✅ ${t.secure}\n\n✅ ${t.remaining}\n\n🚨 *${t.important}:*\n${t.valid}\n${t.after}\n\n${t.welcome}`; $('quoteText').value=text; $('quoteOutput').classList.remove('hidden'); }catch(error){ alert(error.message); } }
+// Configuração do envio de cotações por e-mail via EmailJS.
+ // Preencha os três valores após criar o serviço e o template no EmailJS.
+const EMAILJS_CONFIG = {
+  publicKey: 'KBdaIt9C9qsmc2ftN',
+  serviceId: 'service_xcxvr5j',
+  templateId: 'template_iradl6c',
+  recipient: 'condominiosolarbz@gmail.com'
+};
+function setEmailQuoteStatus(message, kind='') {
+  const el = $('emailQuoteStatus');
+  if (!el) return;
+  el.textContent = message;
+  el.className = `email-status ${kind}`.trim();
+}
+async function sendQuoteByEmail() {
+  const quote = $('quoteText').value.trim();
+  if (!quote) {
+    setEmailQuoteStatus('Gere uma cotação antes de enviar.', 'error');
+    return;
+  }
+  const cfg = EMAILJS_CONFIG;
+  if (!window.emailjs || cfg.publicKey.startsWith('COLOQUE_') ||
+      cfg.serviceId.startsWith('COLOQUE_') || cfg.templateId.startsWith('COLOQUE_')) {
+    setEmailQuoteStatus('Falta configurar o serviço de e-mail. Veja o arquivo INSTRUCOES_EMAIL.md incluído no projeto.', 'error');
+    return;
+  }
+  const button = $('emailQuote');
+  button.disabled = true;
+  button.textContent = 'Enviando…';
+  setEmailQuoteStatus('Enviando cotação para o e-mail de reservas…');
+  try {
+    window.emailjs.init({ publicKey: cfg.publicKey });
+    await window.emailjs.send(cfg.serviceId, cfg.templateId, {
+      to_email: cfg.recipient,
+      subject: `Cotação de hospedagem — ${pousadas[Number($('quoteProperty').value)].name}`,
+      quote_message: quote,
+      property_name: pousadas[Number($('quoteProperty').value)].name
+    });
+    setEmailQuoteStatus('Cotação enviada para ' + cfg.recipient + '.', 'success');
+  } catch (error) {
+    console.error('Falha ao enviar cotação por e-mail:', error);
+    setEmailQuoteStatus('Não foi possível enviar. Confira a configuração do EmailJS e tente novamente.', 'error');
+  } finally {
+    button.disabled = false;
+    button.textContent = 'Enviar para reservas por e-mail';
+  }
+}
 const loftMessage=n=>`Olá! Tudo bem? 😊\n\nAqui é da Pousada Casa Centro. Estamos entrando em contacto para confirmar a sua chegada ao Loft ${String(n).padStart(2,'0')}.\n\nPode informar, por favor, o horário aproximado de chegada? Assim deixamos tudo preparado para receber você.\n\nAguardamos você!`;
 function calculate(){ const total=Number($('calcTotal').value)||0, percent=Number($('calcPercent').value)||0, fee=total*percent/100; $('calcResult').innerHTML=`<span>Base de cálculo: ${brl(total)} · ${percent}%</span><strong>Desconto/Comissão: ${brl(fee)}<br><b>Valor Final: ${brl(total-fee)}</b></strong>`; }
 function convert(){ const currency=$('currency').value, value=Number($('currencyValue').value)||0, rate=Number(fxRates[currency])||0, status=fxOffline?'Fonte local · API indisponível':`Frankfurter · ${fxRateDate?`taxa de ${fxRateDate}`:'a carregar'}`; $('currencyResult').innerHTML=`<span>Referência média · 1 BRL = ${rate.toLocaleString('pt-BR',{minimumFractionDigits:4,maximumFractionDigits:4})} ${currency}</span><strong>${(value*rate).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})} ${currency}</strong><small>${status}. Taxa de referência; confirme o valor final antes de fechar a reserva.</small>`; }
@@ -48,7 +95,7 @@ function toggleQuoteHelp(){const button=$('quoteHelpButton'), help=$('quoteHelp'
 $('quoteHelpButton').onclick=toggleQuoteHelp;
 document.addEventListener('click',event=>{if(!event.target.closest('.help-wrap')){const button=$('quoteHelpButton'),help=$('quoteHelp');if(button&&help){help.classList.remove('show');button.setAttribute('aria-expanded','false');}}});
 renderProperties(); $('quoteProperty').addEventListener('change',updateRoomOptions); renderCalendar(); $('todayLabel').textContent=new Date().toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'long',year:'numeric'}).toUpperCase(); loadHolidays();
-$('prevMonth').onclick=()=>{viewDate.setMonth(viewDate.getMonth()-1);renderCalendar()}; $('nextMonth').onclick=()=>{viewDate.setMonth(viewDate.getMonth()+1);renderCalendar()}; $('generateQuote').onclick=generateQuote; $('copyQuote').onclick=e=>copyText($('quoteText').value,e.target); ['calcTotal','calcPercent'].forEach(id=>$(id).oninput=calculate); ['currencyValue','currency'].forEach(id=>$(id).oninput=convert); calculate(); convert(); loadExchangeRates();
+$('prevMonth').onclick=()=>{viewDate.setMonth(viewDate.getMonth()-1);renderCalendar()}; $('nextMonth').onclick=()=>{viewDate.setMonth(viewDate.getMonth()+1);renderCalendar()}; $('generateQuote').onclick=generateQuote; $('copyQuote').onclick=e=>copyText($('quoteText').value,e.target); $('emailQuote').onclick=sendQuoteByEmail; ['calcTotal','calcPercent'].forEach(id=>$(id).oninput=calculate); ['currencyValue','currency'].forEach(id=>$(id).oninput=convert); calculate(); convert(); loadExchangeRates();
 $('loftButtons').innerHTML=Array.from({length:8},(_,i)=>`<button class="${i===0?'active':''}" data-loft="${i+1}">${String(i+1).padStart(2,'0')}</button>`).join(''); $('loftButtons').onclick=e=>{if(e.target.dataset.loft){selectedLoft=Number(e.target.dataset.loft);document.querySelectorAll('#loftButtons button').forEach(b=>b.classList.toggle('active',b===e.target));$('loftLabel').textContent=`Loft ${String(selectedLoft).padStart(2,'0')}`}}; $('copyLoft').onclick=e=>copyText(loftMessage(selectedLoft),e.target);
 
 const skinByName={luli:'theme-luli',christiano:'theme-christiano',ana:'theme-ana',joanna:'theme-joanna',recepção:'theme-recepcao',recepcao:'theme-recepcao','g hotelaria':'theme-deluxe','g hotelária':'theme-deluxe',natal:'theme-natal',hola:'theme-mechanic',festa:'theme-carnaval'};
